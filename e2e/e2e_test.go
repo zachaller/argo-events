@@ -1,6 +1,9 @@
 package main
 
 import (
+	"os"
+	"testing"
+
 	"github.com/argoproj/argo-events/common"
 	esv1alpha1 "github.com/argoproj/argo-events/pkg/client/eventsources/clientset/versioned/typed/eventsources/v1alpha1"
 	gwv1alpha1 "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/typed/gateway/v1alpha1"
@@ -8,8 +11,8 @@ import (
 	wfv1alpha1 "github.com/argoproj/argo/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
 	"github.com/google/go-github/github"
 	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/suite"
 	"k8s.io/client-go/kubernetes"
-	"os"
 )
 
 const namespace = "argo-events"
@@ -25,6 +28,7 @@ type GitArtifact struct {
 }
 
 type E2ETestSuite struct {
+	suite.Suite
 	K8sClient         kubernetes.Interface
 	GatewayClient     gwv1alpha1.ArgoprojV1alpha1Interface
 	SensorClient      snv1alpha1.ArgoprojV1alpha1Interface
@@ -35,7 +39,7 @@ type E2ETestSuite struct {
 	Logger            *logrus.Logger
 }
 
-func main() {
+func (test *E2ETestSuite) SetupTest() {
 	// kubernetes configuration
 	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
 	restConfig, err := common.GetClientConfig(kubeConfig)
@@ -43,15 +47,20 @@ func main() {
 		panic(err)
 	}
 
-	suite := &E2ETestSuite{
-		K8sClient:         kubernetes.NewForConfigOrDie(restConfig),
-		GatewayClient:     gwv1alpha1.NewForConfigOrDie(restConfig),
-		SensorClient:      snv1alpha1.NewForConfigOrDie(restConfig),
-		WorkflowClient:    wfv1alpha1.NewForConfigOrDie(restConfig),
-		EventSourceClient: esv1alpha1.NewForConfigOrDie(restConfig),
-		GithubClient:      github.NewClient(nil),
-		Branch:            "master",
-		Logger:            common.NewArgoEventsLogger(),
-	}
+	test.K8sClient = kubernetes.NewForConfigOrDie(restConfig)
+	test.GatewayClient = gwv1alpha1.NewForConfigOrDie(restConfig)
+	test.SensorClient = snv1alpha1.NewForConfigOrDie(restConfig)
+	test.WorkflowClient = wfv1alpha1.NewForConfigOrDie(restConfig)
+	test.EventSourceClient = esv1alpha1.NewForConfigOrDie(restConfig)
+	test.GithubClient = github.NewClient(nil)
+	test.Branch = "master"
+	test.Logger = common.NewArgoEventsLogger()
+}
 
+func (test *E2ETestSuite) TestAll() {
+	test.ControllersTest(test.T())
+}
+
+func TestE2ETestSuite(t *testing.T) {
+	suite.Run(t, new(E2ETestSuite))
 }
