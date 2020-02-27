@@ -1,15 +1,18 @@
 package main
 
 import (
-	"github.com/stretchr/testify/require"
+	"fmt"
 	"io/ioutil"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"testing"
 
 	eventSourceV1Alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	gw_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/ghodss/yaml"
+	"github.com/kubernetes/apimachinery/pkg/util/intstr"
+	ocv1 "github.com/openshift/api/route/v1"
+	"github.com/stretchr/testify/require"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func (test *E2ETestSuite) CreateWebhookEventSource() (*eventSourceV1Alpha1.EventSource, error) {
@@ -64,12 +67,41 @@ func (test *E2ETestSuite) WebhookSetupTest(t *testing.T) {
 	sn, err := test.CreateWebhookSensor()
 	require.Nil(t, err)
 	require.NotEmpty(t, sn)
+
+	err = test.WaitForGatewayReadyState(gw.Name)
+	require.Nil(t, err)
+
+	err = test.WaitForSensorReadyState(sn.Name)
+	require.Nil(t, err)
 }
 
-func (test *E2ETestSuite) WebhookResourceTest(t *testing.T, name string) {
-	gateway, err := test.GatewayClient.Gateways(namespace).Get(name, metav1.GetOptions{})
+func (test *E2ETestSuite) WebhookResourceTest(t *testing.T, gatewayName, sensorName string) {
+	gateway, err := test.GatewayClient.Gateways(namespace).Get(gatewayName, metav1.GetOptions{})
 	require.Nil(t, err)
 
 	require.Equal(t, gw_v1alpha1.NodePhaseRunning, gateway.Status.Phase)
 	require.Equal(t, 1, len(gateway.Status.Nodes))
+
+	sensor, err := test.SensorClient.Sensors(namespace).Get(sensorName, metav1.GetOptions{})
+	require.Nil(t, err)
+
+	require.Nil(t, sensorv1alpha1.NodePhaseActive, sensor.Status.Phase)
+
+	gwservice, err := test.K8sClient.CoreV1().Services(namespace).Get(fmt.Sprintf("%-svc", gatewayName), metav1.GetOptions{})
+	require.Nil(t, err)
+
+	route, err := test.OCRouteClient.RouteV1().Routes(namespace).Create(&ocv1.Route{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: gwservice.Name,
+		},
+		Spec: ocv1.RouteSpec{
+			Host: "webhook-gateway-svc-argo-events.devkubewd.dev.blackrock.com",
+			To: ocv1.RouteTargetReference{
+				Kind:   "Service",
+				Name:   gwservice.Name,
+				Weight: 100,
+			},
+			Port: &ocv1.RoutePort{TargetPort: intstr.FromString("example")},
+		},
+	})
 }

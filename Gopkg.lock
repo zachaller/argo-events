@@ -14,7 +14,7 @@
     "pubsub/apiv1",
     "pubsub/internal/distribution"
   ]
-  revision = "8e2a552f585f534f251ac2117fd20ccea598b174"
+  revision = "9b1cd44a2d6085f1aa9bb084e26cd07f68e9d2de"
 
 [[projects]]
   name = "github.com/Azure/azure-amqp-common-go"
@@ -50,8 +50,8 @@
     "services/eventhub/mgmt/2017-04-01/eventhub",
     "version"
   ]
-  revision = "ee7c54530df34dd03f392562bcb869613fd7efdc"
-  version = "v39.3.0"
+  revision = "090dc0ee4d8d2d60e2a9525774d967a4111a2b0c"
+  version = "v40.0.0"
 
 [[projects]]
   name = "github.com/Azure/go-autorest"
@@ -154,7 +154,7 @@
     "service/sts",
     "service/sts/stsiface"
   ]
-  revision = "c4d429b10cd82118afd99ee977b79a1579ed2cca"
+  revision = "284a491980f8fd38e09dc1c7e996e02aa5ed5b5e"
 
 [[projects]]
   name = "github.com/cloudevents/sdk-go"
@@ -667,6 +667,22 @@
   version = "v1.0.8"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/openshift/api"
+  packages = ["route/v1"]
+  revision = "c99157bc6492218400b18cde7f66510f9ee56a9a"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/openshift/client-go"
+  packages = [
+    "route/clientset/versioned",
+    "route/clientset/versioned/scheme",
+    "route/clientset/versioned/typed/route/v1"
+  ]
+  revision = "92a2713fa240ea8a375a982d60b43ef5119f85ba"
+
+[[projects]]
   name = "github.com/pierrec/lz4"
   packages = [
     ".",
@@ -1022,7 +1038,7 @@
     "internal/imports",
     "internal/packagesinternal"
   ]
-  revision = "204d844ad48d13a8a6db39aec90b837cce2e46d9"
+  revision = "b3f10971cb29c47317089f639483f66aa5565d56"
 
 [[projects]]
   branch = "master"
@@ -1720,6 +1736,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b3236bb9ed1574934ac454efcd0b1c29956f39ad6dcb38ed8fc931781922488b"
+  inputs-digest = "2945dbeb7ab70b2715f7ba7055c5ae8af3bbef8260a47d7223a6c69013c8b1ea"
   solver-name = "gps-cdcl"
   solver-version = 1
