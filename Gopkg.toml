@@ -124,14 +124,6 @@ required = [
   name = "github.com/nsqio/go-nsq"
   version = "v1.0.8"
 
-[[constraint]]
-  name = "github.com/openshift/client-go"
-  branch = "master"
-
-[[constraint]]
-  name = "github.com/openshift/api"
-  branch = "master"
-
 [[override]]
   branch = "release-1.15"
   name = "k8s.io/api"
@@ -150,10 +142,6 @@ required = [
 
   [[prune.project]]
     name = "k8s.io/code-generator"
-    unused-packages = false
-
-  [[prune.project]]
-    name = "github.com/argoproj/argo"
     unused-packages = false
 
   [[prune.project]]
